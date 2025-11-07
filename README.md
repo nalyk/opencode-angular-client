@@ -46,7 +46,7 @@ For other installation methods, see [OpenCode documentation](https://docs.openco
 
 ```bash
 # Clone the repository (if not already done)
-git clone https://github.com/opencode-ai/opencode-angular-client.git
+git clone https://github.com/nalyk/opencode-angular-client.git
 cd opencode-angular-client
 
 # Install dependencies

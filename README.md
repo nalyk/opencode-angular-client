@@ -2,6 +2,10 @@
 
 A modern, feature-rich web interface for the OpenCode AI development tool. Built with Angular 19, this standalone frontend provides an intuitive chat-based interface for AI-assisted software development with real-time streaming, multi-project support, and advanced session management.
 
+<p align="center">
+  <img src="./assets/screens/clean.jpeg" alt="OpenCode Angular Client Screenshot" width="100%" style="max-width: 1200px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+</p>
+
 ## ✨ Features
 
 ### Core Capabilities

@@ -1,7 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { Subscription } from 'rxjs';
 import { ServerConfigService } from '../../services/server-config.service';
 
 @Component({
@@ -11,12 +12,13 @@ import { ServerConfigService } from '../../services/server-config.service';
   templateUrl: './server-config.component.html',
   styleUrls: ['./server-config.component.scss']
 })
-export class ServerConfigComponent implements OnInit {
+export class ServerConfigComponent implements OnInit, OnDestroy {
   serverUrl: string = '';
   errorMessage: string = '';
   isLoading: boolean = false;
   isTesting: boolean = false;
   testResult: 'success' | 'error' | null = null;
+  private subscription?: Subscription;
 
   constructor(
     private serverConfig: ServerConfigService,
@@ -24,14 +26,24 @@ export class ServerConfigComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    // Pre-fill with current URL if available
-    const config = this.serverConfig.getConfig();
-    if (config.serverUrl) {
-      this.serverUrl = config.serverUrl;
-    } else {
-      // Suggest a default for Android (consistent with placeholder in template)
-      this.serverUrl = 'http://192.168.1.100:3000';
-    }
+    // Subscribe to config Observable to handle async preferences loading
+    // This fixes the race condition where getConfig() might return stale values
+    this.subscription = this.serverConfig.config$.subscribe(config => {
+      // Only update if we haven't manually entered a URL yet
+      if (this.serverUrl === '' || this.serverUrl === 'http://localhost:3000') {
+        if (config.configured && config.serverUrl) {
+          // User has a saved configuration - use it
+          this.serverUrl = config.serverUrl;
+        } else if (!config.configured) {
+          // First-time user or preferences not loaded yet - show default
+          this.serverUrl = 'http://192.168.1.100:3000';
+        }
+      }
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.subscription?.unsubscribe();
   }
 
   async testConnection(): Promise<void> {

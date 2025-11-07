@@ -237,6 +237,41 @@ This is handled via `Capacitor.isNativePlatform()`.
 - **Web**: Connects to `/event` (proxied to backend)
 - **Android**: Connects to `{serverUrl}/event`
 
+### Security Considerations
+
+**Cleartext HTTP Traffic:**
+
+The Android app is configured with `android:usesCleartextTraffic="true"` in the `AndroidManifest.xml`. This is necessary because:
+
+1. **Android 9+ Security Policy**: Starting with Android 9 (API 28), cleartext (non-HTTPS) HTTP connections are blocked by default
+2. **Local Development**: This app is designed to connect to local development servers (e.g., `http://192.168.1.100:3000`) which typically don't use HTTPS
+3. **Private Networks**: The connections are intended for private local networks, not public internet
+
+**Important Security Notes:**
+- ⚠️ Only connect to servers on trusted networks (your home/office Wi-Fi)
+- ⚠️ Never expose your OpenCode server to the public internet without proper security
+- ⚠️ For production deployments, consider using HTTPS with proper SSL certificates
+- 💡 If you need to connect over HTTPS, you can remove the `usesCleartextTraffic` setting
+
+**For Production Use:**
+If you want to restrict cleartext traffic to specific domains, you can create a network security configuration:
+
+1. Remove `android:usesCleartextTraffic="true"` from `AndroidManifest.xml`
+2. Create `android/app/src/main/res/xml/network_security_config.xml`:
+   ```xml
+   <?xml version="1.0" encoding="utf-8"?>
+   <network-security-config>
+       <domain-config cleartextTrafficPermitted="true">
+           <domain includeSubdomains="true">192.168.0.0/16</domain>
+           <domain includeSubdomains="true">10.0.0.0/8</domain>
+       </domain-config>
+   </network-security-config>
+   ```
+3. Reference it in `AndroidManifest.xml`:
+   ```xml
+   android:networkSecurityConfig="@xml/network_security_config"
+   ```
+
 ## Troubleshooting
 
 ### Connection Issues

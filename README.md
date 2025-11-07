@@ -180,7 +180,6 @@ src/app/
 └── app.config.ts     # Application configuration
 
 proxy.conf.mjs        # API proxy configuration
-docs/                 # Development documentation
 ```
 
 ### Key Technologies
@@ -257,11 +256,6 @@ Contributions are welcome! Please ensure:
 ## 📝 Documentation
 
 - **[CLAUDE.md](./CLAUDE.md)** - Comprehensive developer guide for working with Claude Code
-- **[docs/](./docs/)** - Implementation plans and specifications
-  - MASTER_PLAN.md - Overall architecture plan
-  - PHASE1_FIXES.md - Initial fixes
-  - PHASE2_IMPLEMENTATION.md - Feature implementations
-  - openapi-specs.json - API specifications
 
 ## 🔒 Security
 
@@ -279,7 +273,7 @@ Contributions are welcome! Please ensure:
 
 ## 🐛 Known Issues
 
-See the [docs/](./docs/) folder for current implementation status and known limitations.
+Please report issues on the [GitHub repository](https://github.com/nalyk/opencode-angular-client/issues).
 
 ## 📄 License
 
@@ -298,5 +292,5 @@ Built with:
 
 **Need Help?**
 - Check [CLAUDE.md](./CLAUDE.md) for development guidance
-- Review [docs/](./docs/) for implementation details
 - Ensure OpenCode backend is running on port 3000
+- Report issues on [GitHub](https://github.com/nalyk/opencode-angular-client/issues)

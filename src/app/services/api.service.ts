@@ -4,15 +4,27 @@ import { Observable } from 'rxjs';
 import { SessionInfo, MessageWithParts, CreateSessionInput, PromptInput, TodoItem, FileDiff } from '../models/session.model';
 import { ConfigInfo, ProvidersResponse } from '../models/config.model';
 import { FileNode, FileContent, FileStatus } from '../models/file.model';
+import { ServerConfigService } from './server-config.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ApiService {
-  // Backend serves endpoints WITHOUT /api prefix!
-  private baseUrl = '';
+  constructor(
+    private http: HttpClient,
+    private serverConfig: ServerConfigService
+  ) {}
 
-  constructor(private http: HttpClient) {}
+  /**
+   * Get the base URL for API calls
+   * - On native platforms: use configured server URL
+   * - On web: use empty string (relies on proxy)
+   */
+  private get baseUrl(): string {
+    return this.serverConfig.isNativePlatform
+      ? this.serverConfig.getServerUrl()
+      : '';
+  }
 
   // Session endpoints
   getSessions(directory?: string): Observable<SessionInfo[]> {

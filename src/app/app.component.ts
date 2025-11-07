@@ -1,9 +1,10 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterOutlet, ActivatedRoute } from '@angular/router';
+import { RouterOutlet, ActivatedRoute, Router } from '@angular/router';
 import { SseService } from './services/sse.service';
 import { StateService } from './services/state.service';
 import { ApiService } from './services/api.service';
+import { ServerConfigService } from './services/server-config.service';
 import { Subscription, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { HeaderComponent } from './components/header/header.component';
@@ -79,6 +80,8 @@ export class AppComponent implements OnInit, OnDestroy {
     private stateService: StateService,
     private apiService: ApiService,
     private toastService: ToastService,
+    private serverConfig: ServerConfigService,
+    private router: Router,
     private route: ActivatedRoute
   ) {
     this.sidebarOpen$ = this.stateService.sidebarOpen$;
@@ -86,6 +89,18 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    console.log('[App Component] Starting initialization...');
+
+    // Check server configuration on native platforms
+    const config = this.serverConfig.getConfig();
+    const currentPath = this.router.url;
+
+    if (this.serverConfig.isNativePlatform && !config.configured && currentPath !== '/server-config') {
+      console.log('[App Component] Server not configured, redirecting to server-config...');
+      this.router.navigate(['/server-config']);
+      return; // Don't initialize SSE until configured
+    }
+
     console.log('[App Component] Starting SSE integration...');
 
     // Read directory query param and set in state

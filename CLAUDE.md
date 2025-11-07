@@ -2,7 +2,20 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Platform Support
+
+This application supports both **web browsers** and **native Android** platforms:
+
+- **Web**: Standard Angular development with dev server and proxy configuration
+- **Android**: Native Android app built with Capacitor (see [ANDROID.md](./ANDROID.md) for build instructions)
+
+The app automatically detects the platform and adjusts its behavior:
+- On web: uses proxy to connect to localhost:3000
+- On Android: requires configurable server URL via the server configuration screen
+
 ## Development Commands
+
+### Web Development
 
 ```bash
 # Install dependencies
@@ -20,6 +33,22 @@ npm test
 # Watch mode for development
 npm run watch
 ```
+
+### Android Development
+
+```bash
+# Build and sync to Android
+npm run build
+npx cap sync android
+
+# Open in Android Studio
+npx cap open android
+
+# Build APK (from android directory)
+cd android && ./gradlew assembleDebug
+```
+
+For complete Android build instructions, see [ANDROID.md](./ANDROID.md).
 
 ### Backend Server Requirement
 
@@ -80,7 +109,9 @@ The application uses a centralized state management pattern where:
 
 4. **ApiService** (src/app/services/api.service.ts:11) - REST API client:
    - Handles all HTTP requests to backend
-   - Base URL is empty string (relies on proxy)
+   - Base URL adapts based on platform:
+     - **Web**: empty string (relies on proxy)
+     - **Android**: uses configured server URL from ServerConfigService
    - Returns Observables for reactive composition
    - **Session endpoints**: CRUD, fork, share/unshare, abort, init, summarize
    - **Message endpoints**: get, send, revert, unrevert
@@ -97,7 +128,18 @@ The application uses a centralized state management pattern where:
    - **Project endpoints**: get projects, current project
    - **Auth endpoints**: get providers, update credentials, test auth
 
-5. **ToastService** (src/app/services/toast.service.ts:24) - Notification system:
+5. **ServerConfigService** (src/app/services/server-config.service.ts) - Server configuration management:
+   - Manages OpenCode server URL configuration
+   - **Platform detection**: Automatically detects native vs web platform
+   - **Persistent storage**: Uses Capacitor Preferences for native platforms
+   - **Connection testing**: Validates server connectivity before saving
+   - **URL validation**: Ensures proper URL format (http/https)
+   - **Default behavior**:
+     - Web: defaults to localhost:3000
+     - Android: requires user configuration
+   - Critical for Android app functionality
+
+6. **ToastService** (src/app/services/toast.service.ts:24) - Notification system:
    - Manages toast notifications for file changes and system events
    - Auto-dismissal with configurable duration
    - Action buttons support
@@ -202,6 +244,12 @@ All components are standalone (Angular 19 style):
 
 - **ModelSelectorComponent** - Model selection UI with provider grouping
 
+- **ServerConfigComponent** (src/app/components/server-config/server-config.component.ts) - Server URL configuration
+  - **Android-specific**: Allows configuring OpenCode server URL
+  - Connection testing before saving
+  - First-run setup screen on native platforms
+  - Persistent configuration using Capacitor Preferences
+
 ### TypeScript Configuration
 
 - **Strict mode enabled** - all strict type checking flags are on
@@ -233,11 +281,14 @@ The `proxy.conf.mjs` routes these paths to `http://localhost:3000`:
 
 ### Routes
 
-The application has 3 main routes (defined in src/app/app.routes.ts:3):
+The application has 4 main routes (defined in src/app/app.routes.ts:3):
 - `/` - Home page (HomeComponent)
 - `/session/:id` - Session detail view (SessionDetailComponent)
 - `/settings` - Settings page (SettingsComponent)
-- Lazy-loaded for better performance
+- `/server-config` - Server configuration (ServerConfigComponent) - **Android-specific**
+- All components are lazy-loaded for better performance
+
+**Note**: On Android, the app automatically redirects to `/server-config` on first launch if no server URL is configured.
 
 ## Common Patterns
 

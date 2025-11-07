@@ -1,0 +1,70 @@
+<div class="server-config-container">
+  <div class="server-config-card">
+    <div class="logo">
+      <h1>OpenCode Client</h1>
+    </div>
+
+    <div class="server-config-content">
+      <h2>Configure Server</h2>
+      <p class="description">
+        Enter the URL of your OpenCode server to connect to your development environment.
+      </p>
+
+      <div class="form-group">
+        <label for="serverUrl">Server URL</label>
+        <input
+          type="url"
+          id="serverUrl"
+          [(ngModel)]="serverUrl"
+          placeholder="http://192.168.1.100:3000"
+          class="form-control"
+          [disabled]="isLoading || isTesting"
+          (keyup.enter)="testConnection()"
+        />
+        <small class="form-hint">
+          Example: http://192.168.1.100:3000 or http://your-server-ip:3000
+        </small>
+      </div>
+
+      <div *ngIf="errorMessage" class="alert alert-error">
+        {{ errorMessage }}
+      </div>
+
+      <div *ngIf="testResult === 'success'" class="alert alert-success">
+        ✓ Connection successful! You can now save and continue.
+      </div>
+
+      <div class="button-group">
+        <button
+          type="button"
+          class="btn btn-secondary"
+          (click)="testConnection()"
+          [disabled]="isLoading || isTesting || !serverUrl.trim()"
+        >
+          <span *ngIf="!isTesting">Test Connection</span>
+          <span *ngIf="isTesting">Testing...</span>
+        </button>
+
+        <button
+          type="button"
+          class="btn btn-primary"
+          (click)="saveAndContinue()"
+          [disabled]="isLoading || isTesting || !serverUrl.trim()"
+        >
+          <span *ngIf="!isLoading">Save & Continue</span>
+          <span *ngIf="isLoading">Saving...</span>
+        </button>
+      </div>
+
+      <div class="help-section">
+        <h3>Need Help?</h3>
+        <ul>
+          <li>Make sure your OpenCode server is running</li>
+          <li>Use your computer's local IP address (not localhost)</li>
+          <li>Ensure your phone/device is on the same network</li>
+          <li>The default port is usually 3000</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>

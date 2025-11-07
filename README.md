@@ -1,6 +1,8 @@
 # OpenCode Angular Client
 
-A modern, feature-rich web interface for the OpenCode AI development tool. Built with Angular 19, this standalone frontend provides an intuitive chat-based interface for AI-assisted software development with real-time streaming, multi-project support, and advanced session management.
+A modern, feature-rich web and mobile interface for the OpenCode AI development tool. Built with Angular 19 and Capacitor, this standalone frontend provides an intuitive chat-based interface for AI-assisted software development with real-time streaming, multi-project support, and advanced session management.
+
+**Platform Support:** Web browsers and native Android devices.
 
 <p align="center">
   <img src="./assets/screens/clean.jpeg" alt="OpenCode Angular Client Screenshot" width="100%" style="max-width: 1200px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
@@ -15,6 +17,7 @@ A modern, feature-rich web interface for the OpenCode AI development tool. Built
 - **Command Palette** - Quick access to slash commands and operations (Cmd/Ctrl+K)
 - **File Watcher** - Real-time notifications for file changes in your codebase
 - **Permission System** - Approve or reject AI tool executions with fine-grained control
+- **Native Android App** - Full-featured mobile app with configurable server URL
 
 ### Advanced Features
 - **Session Forking** - Branch off from any message to explore alternatives
@@ -87,6 +90,43 @@ If you see connection errors like `ECONNREFUSED 127.0.0.1:3000`:
 1. Verify the OpenCode backend is running on port 3000
 2. Check that the backend started successfully without errors
 3. Ensure no firewall is blocking the connection
+
+## 📱 Android App
+
+The OpenCode client is also available as a native Android application!
+
+### Features
+- Native Android app built with Capacitor
+- Configurable server URL (connect to any OpenCode server)
+- Real-time updates via SSE
+- Full feature parity with web version
+- Beautiful mobile-optimized interface
+
+### Building the Android APK
+
+For complete instructions on building and installing the Android app, see **[ANDROID.md](./ANDROID.md)**.
+
+Quick build:
+```bash
+# Build the Angular app
+npm run build
+
+# Sync to Android
+npx cap sync android
+
+# Build APK
+cd android && ./gradlew assembleDebug
+```
+
+The APK will be located at `android/app/build/outputs/apk/debug/app-debug.apk`.
+
+### Installing on Your Device
+
+```bash
+adb install android/app/build/outputs/apk/debug/app-debug.apk
+```
+
+Or open the `android` folder in Android Studio and click Run.
 
 ## 📚 Usage
 

@@ -19,6 +19,7 @@ import {
   isSessionErrorEvent,
   isFileWatcherUpdatedEvent
 } from '../models/event.model';
+import { ServerConfigService } from './server-config.service';
 
 export type SSEConnectionState = 'disconnected' | 'connecting' | 'connected' | 'error' | 'reconnecting';
 
@@ -37,6 +38,7 @@ export class SseService implements OnDestroy {
   private reconnectTimer: any = null;
   private baseReconnectDelay = 1000; // 1 second
   private maxReconnectDelay = 30000; // 30 seconds
+  private currentUrl: string = '/event';
 
   // Event-specific observables with shareReplay for late subscribers
   public readonly messageParts$ = this.allEvents$.pipe(
@@ -74,7 +76,10 @@ export class SseService implements OnDestroy {
     shareReplay(1)
   ) as Observable<FileWatcherUpdatedEvent>;
 
-  constructor(private ngZone: NgZone) {
+  constructor(
+    private ngZone: NgZone,
+    private serverConfig: ServerConfigService
+  ) {
     console.log('[SSE Service] v3.0 initialized');
   }
 
@@ -102,7 +107,7 @@ export class SseService implements OnDestroy {
   /**
    * Connect to SSE endpoint with automatic reconnection
    */
-  connect(url: string = '/api/event'): void {
+  connect(url: string = '/event'): void {
     if (this.eventSource?.readyState === EventSource.OPEN) {
       console.log('[SSE Service] Already connected');
       return;
@@ -113,12 +118,18 @@ export class SseService implements OnDestroy {
       return;
     }
 
+    // Construct full URL for native platforms
+    const fullUrl = this.serverConfig.isNativePlatform
+      ? `${this.serverConfig.getServerUrl()}${url}`
+      : url;
+
+    this.currentUrl = url; // Store the path for reconnection
     this.connectionState$.next('connecting');
-    console.log(`[SSE Service] Connecting to ${url}...`);
+    console.log(`[SSE Service] Connecting to ${fullUrl}...`);
 
     this.ngZone.runOutsideAngular(() => {
       try {
-        this.eventSource = new EventSource(url, {
+        this.eventSource = new EventSource(fullUrl, {
           withCredentials: false
         });
 
@@ -163,7 +174,7 @@ export class SseService implements OnDestroy {
             if (errorState) {
               this.connectionState$.next('error');
               this.connectionError$.next(new Error('SSE connection closed'));
-              this.attemptReconnect(url);
+              this.attemptReconnect();
             }
           });
         };
@@ -172,7 +183,7 @@ export class SseService implements OnDestroy {
           console.error('[SSE Service] ✗ Failed to create EventSource:', error);
           this.connectionState$.next('error');
           this.connectionError$.next(error as Error);
-          this.attemptReconnect(url);
+          this.attemptReconnect();
         });
       }
     });
@@ -181,7 +192,7 @@ export class SseService implements OnDestroy {
   /**
    * Attempt to reconnect with exponential backoff
    */
-  private attemptReconnect(url: string): void {
+  private attemptReconnect(): void {
     // Clear any existing timer
     if (this.reconnectTimer) {
       clearTimeout(this.reconnectTimer);
@@ -208,7 +219,7 @@ export class SseService implements OnDestroy {
 
     this.reconnectTimer = setTimeout(() => {
       this.disconnect(false); // Clean up old connection
-      this.connect(url);
+      this.connect(this.currentUrl);
     }, delay);
   }
 

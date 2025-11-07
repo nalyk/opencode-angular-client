@@ -91,23 +91,43 @@ export class AppComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     console.log('[App Component] Starting initialization...');
 
-    // Check server configuration on native platforms
-    const config = this.serverConfig.getConfig();
-    const currentPath = this.router.url;
+    // Wait for server configuration to load asynchronously
+    this.subscriptions.add(
+      this.serverConfig.config$.subscribe(config => {
+        const currentPath = this.router.url;
 
-    if (this.serverConfig.isNativePlatform && !config.configured && currentPath !== '/server-config') {
-      console.log('[App Component] Server not configured, redirecting to server-config...');
-      this.router.navigate(['/server-config']);
-      return; // Don't initialize SSE until configured
-    }
+        // On native platforms, redirect to config if not configured
+        if (this.serverConfig.isNativePlatform && !config.configured && currentPath !== '/server-config') {
+          console.log('[App Component] Server not configured, redirecting to server-config...');
+          this.router.navigate(['/server-config']);
+          return; // Don't initialize SSE until configured
+        }
 
-    console.log('[App Component] Starting SSE integration...');
+        // Only initialize once we have a valid configuration
+        if (!this.serverConfig.isNativePlatform || config.configured) {
+          this.initializeApp();
+        }
+      })
+    );
 
     // Read directory query param and set in state
     this.route.queryParams.subscribe(params => {
       const directory = params['directory'];
       this.stateService.setCurrentDirectory(directory);
     });
+  }
+
+  /**
+   * Initialize SSE connection and event subscriptions
+   */
+  private initializeApp(): void {
+    // Guard against multiple initializations
+    if (this.sseService.isConnected()) {
+      console.log('[App Component] Already initialized, skipping...');
+      return;
+    }
+
+    console.log('[App Component] Starting SSE integration...');
 
     // Connect to SSE - backend serves SSE at /event NOT /api/event!
     this.sseService.connect('/event');

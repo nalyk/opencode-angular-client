@@ -29,8 +29,8 @@ export class ServerConfigComponent implements OnInit {
     if (config.serverUrl) {
       this.serverUrl = config.serverUrl;
     } else {
-      // Suggest a default for Android
-      this.serverUrl = 'http://192.168.1.1:3000';
+      // Suggest a default for Android (consistent with placeholder in template)
+      this.serverUrl = 'http://192.168.1.100:3000';
     }
   }
 
@@ -74,13 +74,10 @@ export class ServerConfigComponent implements OnInit {
     try {
       await this.serverConfig.setServerUrl(this.serverUrl);
 
-      // Navigate to home
-      this.router.navigate(['/']);
-
-      // Reload to establish SSE connection with new URL
-      setTimeout(() => {
+      // Navigate to home, then reload to establish SSE connection with new URL
+      this.router.navigate(['/']).then(() => {
         window.location.reload();
-      }, 100);
+      });
     } catch (error) {
       this.errorMessage = 'Failed to save configuration: ' + (error as Error).message;
     } finally {

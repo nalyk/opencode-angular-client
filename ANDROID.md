@@ -383,7 +383,7 @@ A: Not yet. You need to build and install it yourself. Consider publishing it if
 
 ### Q: What Android versions are supported?
 
-A: Android 5.0 (API level 21) and higher. Recommended: Android 8.0+ for best experience.
+A: Android 6.0 (API level 23) and higher. Recommended: Android 8.0+ for best experience.
 
 ## Contributing
 
